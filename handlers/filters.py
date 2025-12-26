@@ -1,5 +1,4 @@
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup
 from database.filters import add_filter, remove_filter, get_filters
 from utils.typing import typing
 from utils.buttons import parse_buttons
@@ -31,27 +30,23 @@ def register_filters(app):
             "buttons": None
         }
 
-        # TEXT
         if reply.text:
             data["type"] = "text"
             data["text"] = reply.text
             data["buttons"] = parse_buttons(reply.text)
 
-        # PHOTO
         elif reply.photo:
             data["type"] = "photo"
             data["file_id"] = reply.photo.file_id
             data["caption"] = reply.caption
             data["buttons"] = parse_buttons(reply.caption or "")
 
-        # VIDEO
         elif reply.video:
             data["type"] = "video"
             data["file_id"] = reply.video.file_id
             data["caption"] = reply.caption
             data["buttons"] = parse_buttons(reply.caption or "")
 
-        # STICKER
         elif reply.sticker:
             data["type"] = "sticker"
             data["file_id"] = reply.sticker.file_id
@@ -91,9 +86,12 @@ def register_filters(app):
         await message.reply(text)
 
     # =========================
-    # WATCH MESSAGES (AUTO-REPLY)
+    # WATCH MESSAGES (AUTO REPLY) – HIGH PRIORITY
     # =========================
-    @app.on_message(filters.group & filters.text & ~filters.regex(r"^/"))
+    @app.on_message(
+        filters.group & filters.text & ~filters.regex(r"^/"),
+        group=0
+    )
     async def watch(client, message):
         text = message.text.lower()
         filters_list = await get_filters(message.chat.id)
