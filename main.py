@@ -40,4 +40,3 @@ register_notes(app)
 register_welcome(app)
 
 app.run()
-app.run()
