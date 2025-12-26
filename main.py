@@ -27,15 +27,17 @@ async def private_save(_, message):
 async def group_save(_, message):
     await save_group(message.chat)
 
+register_start(app)
+register_help(app)
+
 register_owner(app)
 register_admin(app)
 
 register_warns(app)
 register_locks(app)
-register_welcome(app)
-register_notes(app)
 register_filters(app)
-register_start(app)
-register_help(app)
+register_notes(app)
+register_welcome(app)
 
+app.run()
 app.run()
