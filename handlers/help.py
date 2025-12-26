@@ -1,8 +1,8 @@
 from pyrogram import filters
 
 def register_help(app):
-
-    @app.on_message(filters.command("help"))
+    
+    @app.on_message(filters.group & filters.text & ~filters.command)
     async def help(_, message):
         await message.reply_text(
             "📚 **Available Commands**\n\n"
