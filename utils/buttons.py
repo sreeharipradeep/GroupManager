@@ -1,55 +1,54 @@
-import re
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import re
+
+BUTTON_REGEX = re.compile(r"\[([^\]]+)\]\(buttonurl:(.+?)\)")
 
 
-BUTTON_REGEX = re.compile(
-    r"\[([^\[]+)\]\(buttonurl:(.+?)\)"
-)
-
-
-def parse_buttons(text):
+# =========================
+# PARSE BUTTONS (DB SAFE)
+# =========================
+def parse_buttons(text: str):
     """
-    Supports:
-    [Text](buttonurl:https://example.com)
-    [Text](buttonurl:callback_data)
-    Multiple buttons per line supported
+    Extract buttons from text.
+    Returns LIST of button dicts (DB safe).
     """
-
     if not text:
         return None
 
-    keyboard = []
+    buttons = []
 
     for line in text.split("\n"):
-        row = []
+        match = BUTTON_REGEX.search(line)
+        if match:
+            label = match.group(1)
+            url = match.group(2)
+            buttons.append(
+                {
+                    "text": label,
+                    "url": url
+                }
+            )
 
-        matches = BUTTON_REGEX.findall(line)
-        if not matches:
-            continue
-
-        for label, value in matches:
-            # URL button
-            if value.startswith("http://") or value.startswith("https://"):
-                row.append(
-                    InlineKeyboardButton(label, url=value)
-                )
-            else:
-                # Callback button
-                row.append(
-                    InlineKeyboardButton(label, callback_data=value)
-                )
-
-        if row:
-            keyboard.append(row)
-
-    return InlineKeyboardMarkup(keyboard) if keyboard else None
+    return buttons if buttons else None
 
 
-def clean_button_text(text):
+# =========================
+# BUILD MARKUP (RUNTIME)
+# =========================
+def build_keyboard(buttons):
     """
-    Removes button syntax from message text
+    Convert DB button data to InlineKeyboardMarkup
     """
-    if not text:
-        return text
+    if not buttons:
+        return None
 
-    return BUTTON_REGEX.sub("", text).strip()
+    keyboard = []
+    for btn in buttons:
+        keyboard.append([
+            InlineKeyboardButton(
+                text=btn["text"],
+                url=btn["url"]
+            )
+        ])
+
+    return InlineKeyboardMarkup(keyboard)
