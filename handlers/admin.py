@@ -3,8 +3,8 @@ from pyrogram.types import ChatPermissions
 from utils.admin import is_admin
 from utils.typing import typing
 from database.warns import (
+    remove_one_warn,
     add_warn,
-    reset_warn,
     get_warn_count
 )
 
@@ -105,29 +105,23 @@ def register_admin(app):
     # =========================
     # REMOVE ONE WARN
     # =========================
-    @app.on_message(filters.command("rmwarn") & filters.group)
-    async def remove_warn(client, message):
-        if not await is_admin(client, message):
-            return await message.reply("❌ Admins only.")
+@app.on_message(filters.command("rmwarn") & filters.group)
+async def remove_warn(client, message):
+    if not await is_admin(client, message):
+        return await message.reply("❌ Admins only.")
 
-        user = await get_target_user(client, message)
-        if not user:
-            return await message.reply(
-                "❗ Reply to a user or use:\n`/rmwarn <username>`"
-            )
+    user = await get_target_user(client, message)
+    if not user:
+        return await message.reply(
+            "❗ Reply to a user or use:\n`/rmwarn <username>`"
+        )
 
-        current = await get_warn_count(message.chat.id, user.id)
-        if current <= 0:
-            return await message.reply("ℹ️ User has no warns.")
+    new_count = await remove_one_warn(message.chat.id, user.id)
 
-        # Remove ONE warn
-        await add_warn(message.chat.id, user.id)  # +1
-        await reset_warn(message.chat.id, user.id)  # reset
-        for _ in range(current - 1):
-            await add_warn(message.chat.id, user.id)
-
-        await message.reply(f"✅ One warn removed from {user.mention}")
-
+    await message.reply(
+        f"✅ One warn removed from {user.mention}\n"
+        f"⚠️ Current warns: **{new_count}**"
+    )
     # =========================
     # SHOW WARNINGS
     # =========================
