@@ -14,21 +14,25 @@ WARN_LIMITS = {}
 def register_warns(app):
 
     # =========================
-    # ADMIN CHECK
+    # ADMIN CHECK (FINAL FIX)
     # =========================
     async def is_admin(client, message):
-        # Messages sent as channel (anonymous admin)
+        # If message sent as channel / group (anonymous admin or telegram bug)
         if message.sender_chat:
             return True
 
-        if message.from_user:
+        # Normal user admin check
+        if not message.from_user:
+            return False
+
+        try:
             member = await client.get_chat_member(
                 message.chat.id,
                 message.from_user.id
             )
             return member.status in ("administrator", "owner")
-
-        return False
+        except:
+            return False
 
     # =========================
     # RESOLVE TARGET USER
@@ -75,9 +79,12 @@ def register_warns(app):
             )
 
         # ❌ Prevent warning admins
-        member = await client.get_chat_member(message.chat.id, user.id)
-        if member.status in ("administrator", "owner"):
-            return await message.reply("❌ You can't warn admins.")
+        try:
+            member = await client.get_chat_member(message.chat.id, user.id)
+            if member.status in ("administrator", "owner"):
+                return await message.reply("❌ You can't warn admins.")
+        except:
+            pass
 
         # Parse reason safely
         reason = None
