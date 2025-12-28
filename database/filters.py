@@ -1,4 +1,4 @@
-from database import db
+from .mongodb import db
 
 # Collection name
 filters_col = db.filters
