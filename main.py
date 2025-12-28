@@ -9,6 +9,7 @@ from handlers.admin import register_admin
 from handlers.filters import register_filters
 from handlers.commands import register_commands
 from handlers.owner import register_owner
+from handlers.welcome import register_welcome
 
 
 # ================== UPTIME SERVER ==================
@@ -48,6 +49,7 @@ def main():
     register_filters(app)
     register_commands(app)
     register_owner(app)
+    register_welcome(app)
 
     print("🤖 GroupManager Bot Started")
     app.run()
