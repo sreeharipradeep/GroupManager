@@ -13,25 +13,38 @@ from utils.buttons import parse_buttons
 def register_filters(app):
 
     # =========================
-    # ADMIN CHECK
+    # ADMIN CHECK (FINAL FIX)
     # =========================
-    async def is_admin(client, chat_id, user_id):
-        member = await client.get_chat_member(chat_id, user_id)
-        return member.status in ("administrator", "owner")
+    async def is_admin(client, message):
+        # If sent as channel / group (anonymous admin or telegram bug)
+        if message.sender_chat:
+            return True
+
+        if not message.from_user:
+            return False
+
+        try:
+            member = await client.get_chat_member(
+                message.chat.id,
+                message.from_user.id
+            )
+            return member.status in ("administrator", "owner")
+        except:
+            return False
 
     # =========================
     # ADD FILTER
     # =========================
     @app.on_message(filters.command("filter") & filters.group)
     async def add(client, message):
-
-        # 🔐 Admin only
-        if not await is_admin(client, message.chat.id, message.from_user.id):
+        if not await is_admin(client, message):
             return await message.reply("🚫 Admins only!")
 
         if not message.reply_to_message:
             return await message.reply(
-                "❗ Reply to a message with:\n`/filter <keyword>`\n`/filter -admin <keyword>`"
+                "❗ Reply to a message with:\n"
+                "`/filter <keyword>`\n"
+                "`/filter -admin <keyword>`"
             )
 
         admin_only = False
@@ -96,8 +109,7 @@ def register_filters(app):
     # =========================
     @app.on_message(filters.command(["stop", "stopfilter"]) & filters.group)
     async def stop(client, message):
-
-        if not await is_admin(client, message.chat.id, message.from_user.id):
+        if not await is_admin(client, message):
             return await message.reply("🚫 Admins only!")
 
         if len(message.command) < 2:
@@ -112,29 +124,23 @@ def register_filters(app):
     # =========================
     @app.on_message(filters.command("stopall") & filters.group)
     async def stop_all(client, message):
-
-        if not await is_admin(client, message.chat.id, message.from_user.id):
+        if not await is_admin(client, message):
             return await message.reply("🚫 Admins only!")
 
         await remove_all_filters(message.chat.id)
-
-        await message.reply(
-            "🧹 **All filters have been removed from this group!**"
-        )
+        await message.reply("🧹 **All filters removed from this group!**")
 
     # =========================
     # LIST FILTERS
     # =========================
     @app.on_message(filters.command("filters") & filters.group)
     async def list_filters(_, message):
-
         filters_list = await get_filters(message.chat.id)
 
         if not filters_list:
-            return await message.reply("🧠 No active filters in this group.")
+            return await message.reply("🧠 No active filters.")
 
         text = "🧠 **Active Filters**\n\n"
-
         for f in filters_list:
             badge = " 🔐" if f.get("admin_only") else ""
             text += f"• `{f['keyword']}`{badge}\n"
@@ -149,7 +155,6 @@ def register_filters(app):
         group=10
     )
     async def watch(client, message):
-
         text = message.text or message.caption or ""
 
         # include inline button text
@@ -170,7 +175,7 @@ def register_filters(app):
 
                 # 🔐 Admin-only filter
                 if f.get("admin_only"):
-                    if not await is_admin(client, message.chat.id, message.from_user.id):
+                    if not await is_admin(client, message):
                         continue
 
                 await typing(client, message.chat.id, 1)
@@ -220,7 +225,6 @@ def register_filters(app):
     # =========================
     @app.on_callback_query()
     async def watch_buttons(client, callback_query: CallbackQuery):
-
         if not callback_query.message:
             return
 
@@ -240,11 +244,10 @@ def register_filters(app):
 
                 # 🔐 Admin-only filter
                 if f.get("admin_only"):
-                    if not await is_admin(
-                        client,
-                        chat_id,
-                        callback_query.from_user.id
-                    ):
+                    fake_msg = callback_query.message
+                    fake_msg.from_user = callback_query.from_user
+                    fake_msg.sender_chat = None
+                    if not await is_admin(client, fake_msg):
                         continue
 
                 await typing(client, chat_id, 1)
