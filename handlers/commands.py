@@ -4,9 +4,9 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 START_IMAGES = [
-    "https://graph.org/file/1a6821fcdc7fd4aae1eeb-33d7a469df2a984185.jpg",
-    "https://graph.org/file/6040b38cb51f5dcea0495-ceb88af1e1e97c9321.jpg",
-    "https://graph.org/file/ac7da327e670721e0b0c6-60f85a58a0ffc9130e.jpg",
+    "https://graph.org/file/62386b57bf0394d7bd917-959daf5976f788890f.jpg",
+    "https://graph.org/file/1d87e8717b0675ac15730-c491930774a108b163.jpg",
+    "https://graph.org/file/dbc886d8bb5922d2ac2a6-7a3bbc2919ef5588a6.jpg",
 ]
 
 
@@ -20,18 +20,15 @@ def register_commands(app):
         image = random.choice(START_IMAGES)
 
         text = (
-            "🤖 **Welcome to Miyamizu!**\n\n"
-            "I am a powerful **group management bot**.\n"
-            "I help admins manage groups easily with:\n\n"
-            "• ⚠️ Warn system\n"
-            "• 🧠 Filters\n"
-            "• 🔇 Mute / 🚫 Ban\n"
-            "• 🤖 Auto replies\n\n"
-            "➕ Add me to your group and promote me as admin.\n"
-            "📖 Use /help to see all commands.\n"
-            "🆔 Use /id to get user or group ID."
-        )
-
+    "🍿✨ **Welcome!** ✨🍿\n\n"
+    "🎬 I am the **Filter Bot** of the **Trixel Movie Group**.\n"
+    "➕ You can add ⭐ **me** to your **Channel / Group** and use me easily.\n\n"
+    "✯ ━━━━━━ ✧━━━━━━✯\n\n"
+    "🍿✨ **സ്വാഗതം!** ✨🍿\n\n"
+    "🎥 ഞാൻ **Trixel Movie** 🎬 ഗ്രൂപ്പിന്റെ **ഫിൽട്ടർ ബോട്ട്** ആണ്.\n"
+    "➕ നിങ്ങൾ ⭐ **എന്നെ** നിങ്ങളുടെ **Channel / Group**-ൽ add ചെയ്ത്\n"
+    "സൗകര്യമായി use ചെയ്യാവുന്നതാണ് 😊"
+)
         buttons = InlineKeyboardMarkup(
             [
                 [
